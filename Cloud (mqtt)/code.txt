@@ -1,0 +1,69 @@
+#include <ESP8266WiFi.h>
+#include <DHT.h>
+
+#define DHTPIN 2         // DHT11 connected to GPIO2 (D4)
+#define DHTTYPE DHT11    // DHT11 sensor
+
+DHT dht(DHTPIN, DHTTYPE);
+
+const char* ssid = "Nokia";           // Replace with your WiFi SSID
+const char* password = "12345678";   // Replace with your WiFi Password
+const char* apiKey = "HSXC5SL7T0LHZES1";  // ThingSpeak Write API Key
+const char* server = "api.thingspeak.com";
+
+WiFiClient client;
+
+void setup() {
+  Serial.begin(115200);
+  delay(10);
+
+  dht.begin();
+
+  // Connect to WiFi network
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected");
+}
+
+void loop() {
+  // Read temperature as Celsius
+  float temp = dht.readTemperature();
+
+  // Check if any reads failed
+  if (isnan(temp)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
+
+  // Connect to ThingSpeak and upload data
+  if (client.connect(server, 80)) {
+    String postStr = "api_key=" + String(apiKey) + "&field1=" + String(temp);
+    client.println("POST /update HTTP/1.1");
+    client.println("Host: api.thingspeak.com");
+    client.println("Connection: close");
+    client.println("Content-Type: application/x-www-form-urlencoded");
+    client.print("Content-Length: ");
+    client.println(postStr.length());
+    client.println();
+    client.print(postStr);
+
+    Serial.print("Temperature: ");
+    Serial.print(temp);
+    Serial.println(" °C sent to ThingSpeak");
+
+    client.stop();
+  }
+  else {
+    Serial.println("Failed to connect to ThingSpeak");
+  }
+
+  // Wait 15 seconds to update ThingSpeak
+  delay(15000);
+}

@@ -1,0 +1,3 @@
+Connect the VCC pin of the DHT11 sensor to the 3.3V pin on the ESP8266.
+Connect the GND pin of the DHT11 sensor to GND on the ESP8266.
+Connect the Data pin of the DHT11 to D4 (GPIO2) on the ESP8266.

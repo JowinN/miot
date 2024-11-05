@@ -1,0 +1,24 @@
+// Bluetooth
+#include <SoftwareSerial.h>
+
+
+SoftwareSerial Bluetooth(2, 3); 
+
+void setup() {
+  Serial.begin(9600);         
+  Bluetooth.begin(9600);      
+  Serial.println("Waiting for Bluetooth message...");
+}
+
+void loop() {
+  if (Bluetooth.available()) {
+    char receivedChar = Bluetooth.read();
+    Serial.print("Received: ");
+    Serial.println(receivedChar);
+  }
+
+  if (Serial.available()) {
+    char sendChar = Serial.read();
+    Bluetooth.write(sendChar);
+  }
+}
